@@ -23,14 +23,14 @@ Reference: [THOP: PyTorch-OpCounter](https://github.com/Lyken17/pytorch-OpCounte
 * Count parameters    
     ```python
     from mxop.gluon import count_params
-    op_counter = count_params(net, input_size)   # net is the gluon model you want to count OPs
-                                                 # input_size is the shape of your input 
+    params_counter = count_params(net, input_size)   # net is the gluon model you want to count OPs
+                                                     # input_size is the shape of your input 
     ```
 * Print summary     
     ```python
     from mxop.gluon import op_summary
-    op_counter = op_summary(net, input_size)   # net is the gluon model you want to count OPs 
-                                               # input_size is the shape of your input 
+    op_summary(net, input_size)   # net is the gluon model you want to count OPs 
+                                  # input_size is the shape of your input 
     ```
 
 ### Test
