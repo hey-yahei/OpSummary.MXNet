@@ -5,7 +5,7 @@ from mxnet import nd
 from mxnet.gluon import nn
 from .count_hooks import *
 
-__all__ = ["op_summary"]
+__all__ = ["count_ops", "count_params", "op_summary"]
 __author__ = "YaHei"
 
 register_hooks = {
@@ -35,7 +35,14 @@ def _accumulate_ops(m):
 def _clear_accumulator():
     del _accumulate_ops.total_ops
 
-def op_summary(net, input_size, custom_ops={}):
+def count_params(net):
+    params_counter = 0
+    params = net.collect_params()
+    for p in params:
+        params_counter += params[p].data().size
+    return params_counter
+
+def count_ops(net, input_size, custom_ops={}):
     def add_hooks(m):
         m_type = type(m)
         fn = None
@@ -45,7 +52,6 @@ def op_summary(net, input_size, custom_ops={}):
             fn = register_hooks[m_type]
         elif "_" in m.name:
             logging.info("No count functions match for ", m)
-
         if fn is not None:
             m.ops = dict(_ops_dict)
             m.register_forward_hook(fn)
@@ -53,13 +59,14 @@ def op_summary(net, input_size, custom_ops={}):
     net.apply(add_hooks)
     __ = net(nd.zeros(shape=input_size))
     net.apply(_accumulate_ops)
-
-    # print(_accumulate_ops.total_ops)
-    for op_type, num in _accumulate_ops.total_ops.items():
-        print("{}: {:,}".format(op_type, num))
+    op_counters = _accumulate_ops.total_ops
     _clear_accumulator()
-    params_counter = 0
-    params = net.collect_params()
-    for p in params:
-        params_counter += params[p].data().size
-    print("total parameters: {:,}".format(params_counter))
+    return op_counters
+
+def op_summary(net, input_size, custom_ops={}):
+    op_counter = count_ops(net, input_size, custom_ops)
+    for op_type, num in op_counter.items():
+        print("{}: {:,}".format(op_type, num))
+
+    param_counter = count_params(net)
+    print("total parameters: {:,}".format(param_counter))
