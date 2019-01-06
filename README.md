@@ -3,6 +3,16 @@ It only works for **gluon** yet.
     
 Reference: [THOP: PyTorch-OpCounter](https://github.com/Lyken17/pytorch-OpCounter)    
 
+### Installation    
+* PyPi    
+    ```bash
+    pip install --index-url https://pypi.org/simple/ mxop
+    ```
+* Github (latest)    
+    ```bash
+    pip install --upgrade git+https://github.com/hey-yahei/OpSummary.MXNet.git
+    ```
+
 ### Usage
 #### Gluon
 * Count OPs    
