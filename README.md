@@ -38,7 +38,7 @@ Reference: [THOP: PyTorch-OpCounter](https://github.com/Lyken17/pytorch-OpCounte
 Run `tests/test_gluon_utils.py` to count OPs and parameters for all models in model zoo of MXNet.   
 
 #### Result:
-| Model   | Params(M) | Multiplication(G) | \*Params(M) | *Multiplication(G) | Top1 Acc | Top5 Acc |
+| Model   | Params(M) | Muls(G) | \*Params(M) | *Muls(G) | Top1 Acc | Top5 Acc |
 |---:|---:|---:|---:|---:|---:|---:|
 |AlexNet|61.10|0.71|2.47|0.66|0.5492|0.7803|
 |VGG11|132.86|7.61|9.22|7.49|0.6662|0.8734|
@@ -75,9 +75,9 @@ Run `tests/test_gluon_utils.py` to count OPs and parameters for all models in mo
 |SqueezeNet1_0|1.25|0.82|0.74|0.73|0.5611|0.7909|
 |SqueezeNet1_1|1.24|0.35|0.72|0.26|0.5496|0.7817|
 
-**To compare for classification models used as backbone--**   
+**To compare classification models used as backbone--**   
 **\*Params col shows the number of parameters for models without last several layers.**    
-**\*Multiplication col shows the number of Multiplication for models without last several layers.**     
+**\*Muls col shows the number of Multiplication for models without last several layers.**     
     
 ![Parameters](http://hey-yahei.cn/imgs/MXNet-OpSummary/Parameters.jpg)
     

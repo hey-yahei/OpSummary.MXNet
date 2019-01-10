@@ -27,6 +27,12 @@ _ops_dict = tuple( zip(_ops2collect, [0]*len(_ops2collect)) )
 
 
 def _accumulate_ops(m):
+    """Accumulate op counters to static attr of this function
+    This function is used at mxnet.gluon.Block.apply.
+    For example, `net.apply(_accumulate_ops)`
+    :param m: mxnet.gluon.Block
+    :return: None
+    """
     if not hasattr(_accumulate_ops, 'total_ops'):
         _accumulate_ops.total_ops = dict(_ops_dict)
     if hasattr(m, "ops"):
@@ -35,10 +41,20 @@ def _accumulate_ops(m):
 
 
 def _clear_accumulator():
+    """Clear the accumulator of function `_accumultae_ops`"""
     del _accumulate_ops.total_ops
 
 
 def count_params(net, exclude=[]):
+    """
+    Count parameters for net.
+    :param net: mxnet.gluon.Block
+        Net or block to be counted parameters for.
+    :param exclude: list of mxnet.gluon.nn.Block
+        Blocks to be excluded.
+    :return: int
+        The number of parameters of net.
+    """
     exclude_params = []
     for exc in exclude:
         exclude_params.extend(list(exc.collect_params()))
@@ -52,6 +68,21 @@ def count_params(net, exclude=[]):
 
 
 def count_ops(net, input_size, custom_ops={}, exclude=[]):
+    """
+    Count OPs for net.
+    :param net: mxnet.gluon.Block
+        Net or block to be counted parameters for.
+    :param input_size: tuple
+        The shape of input.
+    :param custom_ops: dict with `op` as key and `func` as value, where
+        `op`: class(mxnet.gluon.nn.Block), the block class you want to count.
+        `func`: callable, the hook function of form `hook(block, input, output) -> None`
+            In the function, you should set values for `block.op` counter.
+            Ref: https://github.com/hey-yahei/OpSummary.MXNet/blob/master/mxop/gluon/count_hooks.py
+    :param exclude: list of mxnet.gluon.nn.Block
+        Blocks to be excluded.
+    :return: dict with op_name as key and number as value
+    """
     def add_hooks(m):
         if m not in exclude:
             m_type = type(m)
@@ -75,6 +106,21 @@ def count_ops(net, input_size, custom_ops={}, exclude=[]):
 
 
 def op_summary(net, input_size, custom_ops={}, exclude=[]):
+    """
+    Print summary via function `count_ops` and `count_params`
+    :param net: mxnet.gluon.Block
+        Net or block to be counted OPs and parameters for.
+    :param input_size: tuple
+        The shape of input.
+    :param custom_ops: dict with `op` as key and `func` as value, where
+        `op`: class(mxnet.gluon.nn.Block), the block class you want to count.
+        `func`: callable, the hook function of form `hook(block, input, output) -> None`
+            In the function, you should set values for `block.op` counter.
+            Ref: https://github.com/hey-yahei/OpSummary.MXNet/blob/master/mxop/gluon/count_hooks.py
+    :param exclude: list of mxnet.gluon.nn.Block
+        Blocks to be excluded.
+    :return: None
+    """
     op_counter = count_ops(net, input_size, custom_ops, exclude)
     for op_type, num in op_counter.items():
         print("{}: {:,}".format(op_type, num))
