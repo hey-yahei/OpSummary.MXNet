@@ -11,6 +11,7 @@ from mxop.gluon.count_hooks import *
 _ops2collect = ["adds", "muls", "divs", "exps"]
 _ops_dict = tuple( zip(_ops2collect, [0]*len(_ops2collect)) )
 
+
 def test_counter(inputs, m, hook):
     print("test function: ", hook.__name__)
     m.ops = dict(_ops_dict)
@@ -20,6 +21,7 @@ def test_counter(inputs, m, hook):
     for op_type, num in m.ops.items():
         print("{}: {:,}".format(op_type, num))
     print()
+
 
 if __name__ == "__main__":
     inputs = nd.zeros(shape=(2,3,10,20))

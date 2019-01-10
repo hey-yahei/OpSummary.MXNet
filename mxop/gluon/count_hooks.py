@@ -8,6 +8,7 @@ __author__ = "YaHei"
 
 import functools
 
+
 def count_conv2d(m, x, y):
     x = x[0]
 
@@ -27,6 +28,7 @@ def count_conv2d(m, x, y):
     m.ops["divs"] = 0
     m.ops["exps"] = 0
 
+
 def count_fc(m, x, y):
     x = x[0]
 
@@ -40,6 +42,7 @@ def count_fc(m, x, y):
     m.ops["divs"] = 0
     m.ops["exps"] = 0
 
+
 def count_bn(m, x, y):
     x = x[0]
 
@@ -50,6 +53,7 @@ def count_bn(m, x, y):
     m.ops["divs"] = n_elem   # m.ops["divs"] = 0 if merge $gamma$ and $sqrt(variance)$
     m.ops["exps"] = 0
 
+
 # def count_relu(m, x, y):
 #     # ignore
 #     # out_relu = max(0, out)
@@ -57,6 +61,7 @@ def count_bn(m, x, y):
 #     m.ops["muls"] = 0
 #     m.ops["divs"] = 0
 #     m.ops["exps"] = 0
+
 
 # def count_softmax(m, x, y):
 #     x = x[0]
@@ -73,6 +78,7 @@ def count_bn(m, x, y):
 #     m.ops["divs"] = divs_per_batch * batch_size
 #     m.ops["exps"] = exps_per_batch * batch_size
 
+
 def count_maxpool(m, x, y):
     # ignore
     # y = max(0, x[a:b,c:d])
@@ -80,6 +86,7 @@ def count_maxpool(m, x, y):
     m.ops["muls"] = 0
     m.ops["divs"] = 0
     m.ops["exps"] = 0
+
 
 def count_avgpool(m, x, y):
     x = x[0]

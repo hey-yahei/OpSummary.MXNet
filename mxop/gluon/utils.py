@@ -25,6 +25,7 @@ register_hooks = {
 _ops2collect = ["adds", "muls", "divs", "exps"]
 _ops_dict = tuple( zip(_ops2collect, [0]*len(_ops2collect)) )
 
+
 def _accumulate_ops(m):
     if not hasattr(_accumulate_ops, 'total_ops'):
         _accumulate_ops.total_ops = dict(_ops_dict)
@@ -32,29 +33,38 @@ def _accumulate_ops(m):
         for op_name in _ops2collect:
             _accumulate_ops.total_ops[op_name] += m.ops[op_name]
 
+
 def _clear_accumulator():
     del _accumulate_ops.total_ops
 
-def count_params(net):
+
+def count_params(net, exclude=[]):
+    exclude_params = []
+    for exc in exclude:
+        exclude_params.extend(list(exc.collect_params()))
+
     params_counter = 0
     params = net.collect_params()
     for p in params:
-        params_counter += params[p].data().size
+        if p not in exclude_params:
+            params_counter += params[p].data().size
     return params_counter
 
-def count_ops(net, input_size, custom_ops={}):
+
+def count_ops(net, input_size, custom_ops={}, exclude=[]):
     def add_hooks(m):
-        m_type = type(m)
-        fn = None
-        if m_type in custom_ops:
-            fn = custom_ops[m_type]
-        elif m_type in register_hooks:
-            fn = register_hooks[m_type]
-        elif "_" in m.name:
-            logging.info("No count functions match for ", m)
-        if fn is not None:
-            m.ops = dict(_ops_dict)
-            m.register_forward_hook(fn)
+        if m not in exclude:
+            m_type = type(m)
+            fn = None
+            if m_type in custom_ops:
+                fn = custom_ops[m_type]
+            elif m_type in register_hooks:
+                fn = register_hooks[m_type]
+            elif "_" in m.name:
+                logging.info("No count functions match for ", m)
+            if fn is not None:
+                m.ops = dict(_ops_dict)
+                m.register_forward_hook(fn)
 
     net.apply(add_hooks)
     __ = net(nd.zeros(shape=input_size))
@@ -63,10 +73,11 @@ def count_ops(net, input_size, custom_ops={}):
     _clear_accumulator()
     return op_counters
 
-def op_summary(net, input_size, custom_ops={}):
-    op_counter = count_ops(net, input_size, custom_ops)
+
+def op_summary(net, input_size, custom_ops={}, exclude=[]):
+    op_counter = count_ops(net, input_size, custom_ops, exclude)
     for op_type, num in op_counter.items():
         print("{}: {:,}".format(op_type, num))
 
-    param_counter = count_params(net)
+    param_counter = count_params(net, exclude)
     print("total parameters: {:,}".format(param_counter))
