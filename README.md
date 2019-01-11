@@ -18,20 +18,46 @@ Reference: [THOP: PyTorch-OpCounter](https://github.com/Lyken17/pytorch-OpCounte
 * Count OPs    
     ```python
     from mxop.gluon import count_ops
-    op_counter = count_ops(net)   # net is the gluon model you want to count OPs 
+    op_counter = count_ops(net [, exclude])   # `net` is the gluon model you want to count OPs 
     ```
 * Count parameters    
     ```python
     from mxop.gluon import count_params
-    params_counter = count_params(net, input_size)   # net is the gluon model you want to count parameters
-                                                     # input_size is the shape of your input 
+    params_counter = count_params(net [, input_size] [, exclude])   # `net` is the gluon model you want to count parameters
+                                                                    # `input_size` is the shape of your input
+                                                                    # `exclude` is the list of blocks to be excluded 
     ```
 * Print summary     
     ```python
     from mxop.gluon import op_summary
-    op_summary(net, input_size)   # net is the gluon model you want to count
-                                  # input_size is the shape of your input 
+    op_summary(net [, input_size] [, exclude])   # `net` is the gluon model you want to count
+                                                 # `input_size` is the shape of your input 
+                                                 # `exclude` is the list of blocks to be excluded
     ```
+
+#### Custom OPs      
+Defining count function for your own blocks is supported.         
+
+1. Define a function `hook(m, x, y) --> None` in which you should set values of OPs for dict `m.ops`, for example,      
+    ```python
+    def count_bn(m, x, y):
+        x = x[0]
+        n_elem = x.size
+        m.ops["adds"] = 2*n_elem
+        m.ops["muls"] = n_elem
+        m.ops["divs"] = n_elem
+        m.ops["exps"] = 0
+    ```     
+2. Use it as a parameter when you call function `count_op` or `op_summary`, for example,       
+    ```python
+    from mxnet.gluon import nn
+    from mxop.gluon import count_ops, op_summary
+    custom_ops = {nn.BatchNorm: count_bn}
+    counter = count_ops(net, custom_ops=custom_ops)
+    # op_summaary(net, custom_ops=custom_ops)
+    ```       
+    
+You can also use your own count function for some blocks that I have setted count function for, because functions list in `custom_ops` is given higher priority.      
 
 ### Test
 
@@ -77,11 +103,13 @@ Run `tests/test_gluon_utils.py` to count OPs and parameters for all models in mo
 
 **To compare classification models used as backbone--**   
 **\*Params col shows the number of parameters for models without last several layers.**    
-**\*Muls col shows the number of Multiplication for models without last several layers.**     
+**\*Muls col shows the number of multiplications for models without last several layers.**     
     
 ![Parameters](http://hey-yahei.cn/imgs/MXNet-OpSummary/Parameters.jpg)
     
-![Multiplication](http://hey-yahei.cn/imgs/MXNet-OpSummary/Multiplication.jpg)   
+![Multiplication](http://hey-yahei.cn/imgs/MXNet-OpSummary/Multiplication.jpg)    
+     
+***The data above may help with design when you choose such CNNs as backbone.***     
 
 ### TODO
     
