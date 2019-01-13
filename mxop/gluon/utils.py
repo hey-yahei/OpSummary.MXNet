@@ -40,9 +40,11 @@ def _accumulate_ops(m):
             _accumulate_ops.total_ops[op_name] += m.ops[op_name]
 
 
-def _clear_accumulator():
-    """Clear the accumulator of function `_accumultae_ops`"""
-    del _accumulate_ops.total_ops
+def _pop_accumulator(func, attr):
+    """Return and clear the accumulator of function `_accumultae_ops`"""
+    ret = getattr(func, attr)
+    delattr(func, attr)
+    return ret
 
 
 def count_params(net, exclude=[]):
@@ -83,6 +85,7 @@ def count_ops(net, input_size, custom_ops={}, exclude=[]):
         Blocks to be excluded.
     :return: dict with op_name as key and number as value
     """
+    hooks = []
     def add_hooks(m):
         if m not in exclude:
             m_type = type(m)
@@ -95,13 +98,14 @@ def count_ops(net, input_size, custom_ops={}, exclude=[]):
                 logging.info("No count functions match for ", m)
             if fn is not None:
                 m.ops = dict(_ops_dict)
-                m.register_forward_hook(fn)
+                hooks.append( m.register_forward_hook(fn) )
 
     net.apply(add_hooks)
     __ = net(nd.zeros(shape=input_size))
     net.apply(_accumulate_ops)
-    op_counters = _accumulate_ops.total_ops
-    _clear_accumulator()
+    op_counters = _pop_accumulator(_accumulate_ops, "total_ops")
+    for h in hooks:
+        h.detach()
     return op_counters
 
 

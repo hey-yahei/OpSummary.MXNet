@@ -57,7 +57,7 @@ Defining count function for your own blocks is supported.
     # op_summaary(net, custom_ops=custom_ops)
     ```       
     
-You can also use your own count function for some blocks that I have setted count function for, because functions list in `custom_ops` is given higher priority.      
+You can also use your own count function for blocks that I have setted count function for, because functions list in `custom_ops` is given higher priority.      
 
 ### Test
 
