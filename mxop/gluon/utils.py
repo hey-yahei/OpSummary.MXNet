@@ -86,7 +86,9 @@ def count_ops(net, input_size, custom_ops={}, exclude=[]):
     :return: dict with op_name as key and number as value
     """
     hooks = []
-    def add_hooks(m):
+
+    # Count ops
+    def _add_hooks(m):
         if m not in exclude:
             m_type = type(m)
             fn = None
@@ -99,13 +101,19 @@ def count_ops(net, input_size, custom_ops={}, exclude=[]):
             if fn is not None:
                 m.ops = dict(_ops_dict)
                 hooks.append( m.register_forward_hook(fn) )
-
-    net.apply(add_hooks)
+    net.apply(_add_hooks)
     __ = net(nd.zeros(shape=input_size))
     net.apply(_accumulate_ops)
     op_counters = _pop_accumulator(_accumulate_ops, "total_ops")
+
+    # Delete accumulators and detach all hooks
+    def _del_ops(m):
+        if hasattr(m, "ops"):
+            delattr(m, "ops")
+    net.apply(_del_ops)
     for h in hooks:
         h.detach()
+
     return op_counters
 
 
