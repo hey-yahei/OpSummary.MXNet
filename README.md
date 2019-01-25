@@ -116,4 +116,6 @@ Run `tests/test_gluon_utils.py` to count OPs and parameters for all models in mo
 - [ ] Count OPs and parameters for each layer.
 - [ ] Support Symbol model for MXNet.      
 - [ ] Support quantized models.
- 
+
+--------------------------     
+***More details refer to 《[模型参数与计算量 | Hey~YaHei!](http://hey-yahei.cn/2019/01/07/MXNet-OpSummary/)》***
