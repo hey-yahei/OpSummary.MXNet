@@ -91,11 +91,8 @@ def count_maxpool(m, x, y):
 def count_avgpool(m, x, y):
     x = x[0]
 
-    m_str = str(m)  # AvgPool2D(size=(2, 2), stride=(2, 2), padding=(0, 0), ceil_mode=False)
-    m_str = m_str[m_str.index("size"):]     # size=(2, 2), stride=(2, 2), padding=(0, 0), ceil_mode=False)
-    m_str = m_str[len("size=(") : m_str.index(")")]    # 2, 2
-    kernel = [int(k) for k in m_str.split(",")]
-    adds_per_elem = functools.reduce(lambda x,y: x*y, kernel, 1) - 1
+    kernel_size = m._kwargs['kernel']
+    adds_per_elem = functools.reduce(lambda x, y: x * y, kernel_size, 1) - 1
     divs_per_elem = 1
 
     n_elem = y.size
