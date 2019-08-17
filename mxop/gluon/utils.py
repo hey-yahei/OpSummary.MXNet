@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 
 import logging
+from collections import OrderedDict
 from mxnet import nd
 from mxnet.gluon import nn
 from .count_hooks import *
@@ -47,6 +48,17 @@ def _pop_accumulator(func, attr):
     return ret
 
 
+def _collect_op_counters(net):
+    """ Collect all op counters of blocks """
+    counters = OrderedDict()
+    def _collect(m):
+        nonlocal counters
+        if hasattr(m, "ops"):
+            counters[m] = m.ops
+    net.apply(_collect)
+    return counters
+
+
 def count_params(net, exclude=[]):
     """
     Count parameters for net.
@@ -69,7 +81,7 @@ def count_params(net, exclude=[]):
     return params_counter
 
 
-def count_ops(net, input_size, custom_ops={}, exclude=[]):
+def count_ops(net, input_size, custom_ops={}, exclude=[], per_block=False):
     """
     Count OPs for net.
     :param net: mxnet.gluon.Block
@@ -83,7 +95,12 @@ def count_ops(net, input_size, custom_ops={}, exclude=[]):
             Ref: https://github.com/hey-yahei/OpSummary.MXNet/blob/master/mxop/gluon/count_hooks.py
     :param exclude: list of mxnet.gluon.nn.Block
         Blocks to be excluded.
-    :return: dict with op_name as key and number as value
+    :param per_block: bool
+        if True, count for every block
+    :return:
+        if per_block is False, return dict with (op_name, number) as key-value;
+        if per_block is True, return dict with (block, counter) as key-value
+            where block is a instance of gluon-block, and counter is the dict with (op_name, number) as key-value
     """
     hooks = []
 
@@ -103,8 +120,11 @@ def count_ops(net, input_size, custom_ops={}, exclude=[]):
                 hooks.append( m.register_forward_hook(fn) )
     net.apply(_add_hooks)
     __ = net(nd.zeros(shape=input_size))
-    net.apply(_accumulate_ops)
-    op_counters = _pop_accumulator(_accumulate_ops, "total_ops")
+    if per_block:
+        op_counters = _collect_op_counters(net)
+    else:
+        net.apply(_accumulate_ops)
+        op_counters = _pop_accumulator(_accumulate_ops, "total_ops")
 
     # Delete accumulators and detach all hooks
     def _del_ops(m):
