@@ -20,6 +20,16 @@ Reference: [THOP: PyTorch-OpCounter](https://github.com/Lyken17/pytorch-OpCounte
     from mxop.gluon import count_ops
     op_counter = count_ops(net [, exclude])   # `net` is the gluon model you want to count OPs 
     ```
+* Count OPs(for every blocks)    
+    ```python
+    from mxop.gluon import count_ops
+    op_counters = count_ops(net, per_block=True)
+    # Print muls
+    mul_counter = {k: v['muls'] for k, v in op_counters.items()}
+    total = sum(mul_counter.values())
+    for k, v in mul_counter.items():
+        print(f"{k.name}\t{v/total*100:.2f}%")  
+    ```
 * Count parameters    
     ```python
     from mxop.gluon import count_params
@@ -113,7 +123,7 @@ Run `tests/test_gluon_utils.py` to count OPs and parameters for all models in mo
 
 ### TODO
     
-- [ ] Count OPs and parameters for each layer.
+- [x] Count OPs and parameters for each layer.
 - [ ] Support Symbol model for MXNet.      
 - [ ] Support quantized models.
 
