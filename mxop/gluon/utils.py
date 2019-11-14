@@ -81,13 +81,13 @@ def count_params(net, exclude=[]):
     return params_counter
 
 
-def count_ops(net, input_size, custom_ops={}, exclude=[], per_block=False):
+def count_ops(net, inputs, custom_ops={}, exclude=[], per_block=False):
     """
     Count OPs for net.
     :param net: mxnet.gluon.Block
         Net or block to be counted parameters for.
-    :param input_size: tuple
-        The shape of input.
+    :param inputs: tuple
+        The inputs to feed net.
     :param custom_ops: dict with `op` as key and `func` as value, where
         `op`: class(mxnet.gluon.nn.Block), the block class you want to count.
         `func`: callable, the hook function of form `hook(block, input, output) -> None`
@@ -119,7 +119,7 @@ def count_ops(net, input_size, custom_ops={}, exclude=[], per_block=False):
                 m.ops = dict(_ops_dict)
                 hooks.append( m.register_forward_hook(fn) )
     net.apply(_add_hooks)
-    __ = net(nd.zeros(shape=input_size))
+    __ = net(*inputs)
     if per_block:
         op_counters = _collect_op_counters(net)
     else:
@@ -137,13 +137,13 @@ def count_ops(net, input_size, custom_ops={}, exclude=[], per_block=False):
     return op_counters
 
 
-def op_summary(net, input_size, custom_ops={}, exclude=[]):
+def op_summary(net, inputs, custom_ops={}, exclude=[]):
     """
     Print summary via function `count_ops` and `count_params`
     :param net: mxnet.gluon.Block
         Net or block to be counted OPs and parameters for.
-    :param input_size: tuple
-        The shape of input.
+    :param inputs: tuple
+        The inputs to feed net.
     :param custom_ops: dict with `op` as key and `func` as value, where
         `op`: class(mxnet.gluon.nn.Block), the block class you want to count.
         `func`: callable, the hook function of form `hook(block, input, output) -> None`
@@ -153,7 +153,7 @@ def op_summary(net, input_size, custom_ops={}, exclude=[]):
         Blocks to be excluded.
     :return: None
     """
-    op_counter = count_ops(net, input_size, custom_ops, exclude)
+    op_counter = count_ops(net, inputs, custom_ops, exclude)
     for op_type, num in op_counter.items():
         print("{}: {:,}".format(op_type, num))
 

@@ -2,6 +2,9 @@
 
 import sys
 sys.path.append("..")
+from mxop.gluon import op_summary
+
+from mxnet import nd
 
 from mxnet.gluon.model_zoo.vision import alexnet
 from mxnet.gluon.model_zoo.vision import vgg11, vgg13, vgg16, vgg19, vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
@@ -12,7 +15,6 @@ from mxnet.gluon.model_zoo.vision import densenet121, densenet161, densenet169, 
 from mxnet.gluon.model_zoo.vision import mobilenet1_0, mobilenet0_75, mobilenet0_5, mobilenet0_25, \
                                           mobilenet_v2_1_0, mobilenet_v2_0_75, mobilenet_v2_0_5, mobilenet_v2_0_25
 from mxnet.gluon.model_zoo.vision import squeezenet1_0, squeezenet1_1
-from mxop.gluon import op_summary
 
 dropped_layers = {
     alexnet: {"features": (8,), "output": None},    # Flatten - Dense - Dropout - Dense - Dropout - Dense
@@ -72,7 +74,7 @@ def test_op_summary(m, input_size=(1,3,224,224), drop_fc=False):
     print("test for", m.__name__)
     net = m()
     net.initialize()
-    op_summary(net, input_size, exclude=_fetch_dropped_fc(m, net) if drop_fc else [])
+    op_summary(net, (nd.ones(shape=input_size),), exclude=_fetch_dropped_fc(m, net) if drop_fc else [])
     print()
 
 
