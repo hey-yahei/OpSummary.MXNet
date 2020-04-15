@@ -129,4 +129,4 @@ Run `tests/test_gluon_utils.py` to count OPs and parameters for all models in mo
 - [ ] Support quantized models.
 
 --------------------------     
-***More details refer to 《[模型参数与计算量 | Hey~YaHei!](http://hey-yahei.cn/2019/01/07/MXNet-OpSummary/)》***
+***More details refer to 《[模型参数与计算量 | Hey~YaHei!](https://www.yuque.com/yahei/hey-yahei/opsummary.mxnet)》***
